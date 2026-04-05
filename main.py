@@ -1,22 +1,28 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from gemini import ask_gemini
+from orchestrator import primary_agent
 
 app = FastAPI()
 
+# Request model
 class ChatRequest(BaseModel):
     message: str
 
+# Optional: Home route (test ke liye)
+@app.get("/")
+def home():
+    return {"message": "StudyOps Multi-Agent API Running"}
+
+# Main chat endpoint
 @app.post("/chat")
 def chat(req: ChatRequest):
-    
-    prompt = f"""
-    You are a study planner AI.
-    User: {req.message}
-    
-    Create a simple study plan.
-    """
-    
-    response = ask_gemini(prompt)
-    
-    return {"response": response}
+
+    user_input = req.message
+
+    # Call primary agent (orchestrator)
+    result = primary_agent(user_input)
+
+    return {
+        "input": user_input,
+        "response": result
+    }
