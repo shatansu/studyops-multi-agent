@@ -1,4 +1,13 @@
 from gemini import ask_gemini
+from tools import create_task
+import json
+import re
+
+# 🔹 Clean JSON helper
+def clean_json(text):
+    text = re.sub(r"```json|```", "", text).strip()
+    return json.loads(text)
+
 
 def planning_agent(user_input, subject):
 
@@ -26,4 +35,22 @@ FORMAT:
 }}
 """
 
-    return ask_gemini(prompt).strip()
+    # 🔹 Gemini call
+    raw = ask_gemini(prompt)
+
+    # 🔹 Convert to JSON
+    data = clean_json(raw)
+
+    # 🔥 SAVE TASKS TO FIREBASE
+    for day in data.get("days", []):
+        for topic in day.get("topics", []):
+            create_task({
+                "user_id": "user1",
+                "subject": subject,
+                "day": day.get("day"),
+                "task": topic,
+                "status": "pending"
+            })
+
+    # 🔹 Return original raw (orchestrator handle karega)
+    return raw.strip()
