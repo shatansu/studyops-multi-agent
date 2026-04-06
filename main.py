@@ -4,25 +4,21 @@ from orchestrator import primary_agent
 
 app = FastAPI()
 
-# Request model
 class ChatRequest(BaseModel):
     message: str
 
-# Optional: Home route (test ke liye)
+
 @app.get("/")
 def home():
-    return {"message": "StudyOps Multi-Agent API Running"}
+    return {"message": "StudyOps Multi-Agent Running"}
 
-# Main chat endpoint
+
 @app.post("/chat")
 def chat(req: ChatRequest):
 
-    user_input = req.message
-
-    # Call primary agent (orchestrator)
-    result = primary_agent(user_input)
+    result = primary_agent(req.message)
 
     return {
-        "input": user_input,
+        "input": req.message,
         "response": result
     }
