@@ -3,6 +3,16 @@ import re
 from agents.planning_agent import planning_agent
 from agents.notes_agent import notes_agent
 from firebase_db import get_tasks, get_notes
+from agents.reminder_agent import reminder_agent
+from firebase_db import get_reminders
+# 🔥 Reminder create
+if "remind" in text or "yaad" in text:
+    raw = reminder_agent(user_input)
+    return extract_json(raw)
+
+# 🔥 Show reminders
+elif "show reminders" in text:
+    return get_reminders("user1")
 
 
 # 🔹 Clean JSON

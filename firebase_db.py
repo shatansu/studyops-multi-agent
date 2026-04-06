@@ -27,3 +27,13 @@ def get_tasks(user_id):
 def get_notes(user_id):
     docs = db.collection("notes").where("user_id", "==", user_id).stream()
     return [doc.to_dict() for doc in docs]
+
+    # 🔹 SAVE REMINDER
+def save_reminder(reminder):
+    reminder["created_at"] = datetime.now().isoformat()
+    db.collection("reminders").add(reminder)
+
+# 🔹 GET REMINDERS
+def get_reminders(user_id):
+    docs = db.collection("reminders").where("user_id", "==", user_id).stream()
+    return [doc.to_dict() for doc in docs]
