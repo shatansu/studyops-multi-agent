@@ -1,6 +1,11 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from orchestrator import primary_agent
+import threading
+from scheduler import run_scheduler
+
+# 🔥 Start background scheduler
+threading.Thread(target=run_scheduler, daemon=True).start()
 
 app = FastAPI()
 
