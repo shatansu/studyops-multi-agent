@@ -4,9 +4,10 @@ from agents.planning_agent import planning_agent
 from agents.notes_agent import notes_agent
 from agents.reminder_agent import reminder_agent
 from firebase_db import get_tasks, get_notes, get_reminders
+from mcp_executor import execute_mcp
 
 
-# 🔹 Clean JSON
+# 🔹 Clean JSON (fallback)
 def extract_json(text):
     text = re.sub(r"```json|```", "", text).strip()
     try:
@@ -29,7 +30,7 @@ def extract_subjects(text):
     return subjects
 
 
-# 🔥 MAIN FUNCTION (IMPORTANT)
+# 🔥 MAIN AGENT
 def primary_agent(user_input):
 
     text = user_input.lower()
@@ -46,12 +47,20 @@ def primary_agent(user_input):
     elif "show reminders" in text:
         return get_reminders("user1")
 
-    # 🔥 4. CREATE REMINDER
+    # 💀 4. MCP REMINDER (AI decides tool)
     elif "remind" in text or "yaad" in text:
         raw = reminder_agent(user_input)
-        return extract_json(raw)
 
-    # 🔥 5. PLANNING
+        # 🔥 MCP EXECUTION
+        result = execute_mcp(raw)
+
+        return {
+            "type": "mcp_execution",
+            "agent_output": raw,
+            "execution": result
+        }
+
+    # 🔥 5. PLANNING (still structured)
     elif "exam" in text or "prepare" in text:
 
         subjects = extract_subjects(text)
@@ -70,11 +79,13 @@ def primary_agent(user_input):
             "plans": results
         }
 
-    # 🔥 6. NOTES
+    # 🔥 6. NOTES (can upgrade to MCP later)
     elif "notes" in text:
         raw = notes_agent(user_input)
         return extract_json(raw)
 
     # 🔹 fallback
     else:
-        return {"message": "I can help with study plans, notes, reminders, or show your data."}
+        return {
+            "message": "I can help with study plans, notes, reminders, or show your data."
+        }
