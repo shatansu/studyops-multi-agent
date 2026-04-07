@@ -2,17 +2,8 @@ import json
 import re
 from agents.planning_agent import planning_agent
 from agents.notes_agent import notes_agent
-from firebase_db import get_tasks, get_notes
 from agents.reminder_agent import reminder_agent
-from firebase_db import get_reminders
-# 🔥 Reminder create
-if "remind" in text or "yaad" in text:
-    raw = reminder_agent(user_input)
-    return extract_json(raw)
-
-# 🔥 Show reminders
-elif "show reminders" in text:
-    return get_reminders("user1")
+from firebase_db import get_tasks, get_notes, get_reminders
 
 
 # 🔹 Clean JSON
@@ -38,20 +29,29 @@ def extract_subjects(text):
     return subjects
 
 
-# 🔹 MAIN AGENT
+# 🔥 MAIN FUNCTION (IMPORTANT)
 def primary_agent(user_input):
 
     text = user_input.lower()
 
-    # 🔥 1. RETRIEVE TASKS (TOP PRIORITY)
+    # 🔥 1. SHOW TASKS
     if "show tasks" in text:
         return get_tasks("user1")
 
-    # 🔥 2. RETRIEVE NOTES
+    # 🔥 2. SHOW NOTES
     elif "show notes" in text:
         return get_notes("user1")
 
-    # 🔥 3. PLANNING
+    # 🔥 3. SHOW REMINDERS
+    elif "show reminders" in text:
+        return get_reminders("user1")
+
+    # 🔥 4. CREATE REMINDER
+    elif "remind" in text or "yaad" in text:
+        raw = reminder_agent(user_input)
+        return extract_json(raw)
+
+    # 🔥 5. PLANNING
     elif "exam" in text or "prepare" in text:
 
         subjects = extract_subjects(text)
@@ -70,11 +70,11 @@ def primary_agent(user_input):
             "plans": results
         }
 
-    # 🔥 4. NOTES GENERATION
+    # 🔥 6. NOTES
     elif "notes" in text:
         raw = notes_agent(user_input)
         return extract_json(raw)
 
     # 🔹 fallback
     else:
-        return {"message": "I can help with study plans, notes, or show your saved data."}
+        return {"message": "I can help with study plans, notes, reminders, or show your data."}
